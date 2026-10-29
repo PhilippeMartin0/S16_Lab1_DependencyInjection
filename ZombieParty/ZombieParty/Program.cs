@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ZombieParty.Models.Data;
+using ZombieParty.Utility;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,10 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ZombiePartyDbContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")).UseLazyLoadingProxies()
 );
+builder.Services.AddSingleton<IImageFileManager, ImageFileManager>();
+builder.Services.AddScoped<IZombiePartyDbContextSeed, ZombiePartyDbContextSeed>();
+
+
 
 var app = builder.Build();
 
@@ -29,5 +34,21 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+using (var scope = app.Services.CreateScope())
+{
+
+    var scopedProvider = scope.ServiceProvider;
+    try
+    {
+        var zombiePartyDbContextSeed = scopedProvider.GetRequiredService<IZombiePartyDbContextSeed>();
+        await zombiePartyDbContextSeed.SeedAsync();
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogError(ex, "An error occurred seeding the DB.");
+    }
+}
+
 
 app.Run();

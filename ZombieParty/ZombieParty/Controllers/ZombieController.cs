@@ -11,11 +11,13 @@ namespace ZombieParty.Controllers
     {
         private ZombiePartyDbContext context;
         private readonly IWebHostEnvironment webHostEnvironment;
+        private IImageFileManager _imageFileManager;
 
-        public ZombieController(ZombiePartyDbContext context, IWebHostEnvironment webHostEnvironment)
+        public ZombieController(ZombiePartyDbContext context, IWebHostEnvironment webHostEnvironment, IImageFileManager imageFileManager)
         {
             this.context = context;
             this.webHostEnvironment = webHostEnvironment;
+            imageFileManager = _imageFileManager;
         }
 
         public async Task<IActionResult> Index()
@@ -45,13 +47,14 @@ namespace ZombieParty.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Upsert(Zombie zombie)
+        public async Task<IActionResult> Upsert([FromServices] IImageFileManager imageFileManager, Zombie zombie)
         {
             if (ModelState.IsValid)
             {
                 IFormCollection form = HttpContext.Request.Form;
                 bool edit = zombie.Id != 0;
                 string? oldImagePath = zombie.Image;
+                zombie.Image = imageFileManager.UploadImage(form, edit, oldImagePath);
 
                 // Début du code qui doit être déplacer dans ImageFileManager
                 var files = form.Files; //nouvelle image récupérée
