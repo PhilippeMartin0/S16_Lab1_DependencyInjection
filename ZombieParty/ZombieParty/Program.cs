@@ -9,8 +9,16 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ZombiePartyDbContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")).UseLazyLoadingProxies()
 );
-builder.Services.AddSingleton<IImageFileManager, ImageFileManager>();
-builder.Services.AddScoped<IZombiePartyDbContextSeed, ZombiePartyDbContextSeed>();
+switch (builder.Environment.EnvironmentName)
+{
+    case "Development":
+        builder.Services.AddScoped<IZombiePartyDbContextSeed, ZombiePartyDbContextSeedDev>(); break;
+    case "StagingPerf":
+        builder.Services.AddScoped<IZombiePartyDbContextSeed, ZombiePartyDbContextSeedStagingPerf>(); break;
+    default:
+        builder.Services.AddScoped<IZombiePartyDbContextSeed, ZombiePartyDbContextSeedProd>(); break;
+}
+
 
 
 

@@ -5,7 +5,7 @@ namespace ZombieParty.Models.Data
     public class ZombiePartyDbContextSeedDev : ZombiePartyDbContextSeed
     {
         protected int numberZombieType = 15;
-        protected int numberZombie = 10;
+        protected int numberZombie = 100;
         protected int numberWeapon = 50;
 
         public ZombiePartyDbContextSeedDev(ILogger<ZombiePartyDbContextSeed> logger, ZombiePartyDbContext context) : base(logger, context)
